@@ -108,7 +108,7 @@ class Battlesnake(object):
             return (True, False, move_block)
 
         def should_move_left():
-            left_coord = coord(x(head) + 1, y(head))
+            left_coord = coord(x(head) - 1, y(head))
             if x(left_coord) <= left_limit() or left_coord in body or left_coord in hazards:
                 return (False, False, None)
 
@@ -116,7 +116,9 @@ class Battlesnake(object):
 
             return (True, False, move_block)
 
-        
+        def make_move(move):
+            print(f"MOVE: {move}")
+            return {"move": move}
 
         possible_moves = []
 
@@ -126,28 +128,31 @@ class Battlesnake(object):
         left_result = should_move_left()
 
         if bool(down_result[0]):
+            if bool(down_result[1]):
+                return make_move(down_result[2].move)
             possible_moves.append(down_result[2].move)
+
         if bool(right_result[0]):
+            if bool(right_result[1]):
+                return make_move(right_result[2].move)
             possible_moves.append(right_result[2].move)
+
         if bool(up_result[0]):
+            if bool(up_result[1]):
+                return make_move(up_result[2].move)
             possible_moves.append(up_result[2].move)
+
         if bool(left_result[0]):
+            if bool(left_result[1]):
+                return make_move(left_result[2].move)
             possible_moves.append(left_result[2].move)
 
+        
         print(f"MOVES: {possible_moves}")
-
-        
-
-        
-        # possible_moves = ["up", "down", "right", "left"]
-
-        
-
         # Choose a random direction to move in from applicable moves
         move = random.choice(possible_moves)
 
-        print(f"MOVE: {move}")
-        return {"move": move}
+        return make_move(move)
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -168,23 +173,6 @@ if __name__ == "__main__":
     )
     print("Starting Battlesnake Server...")
     cherrypy.quickstart(server)
-
-
-# no_up_mutilation = all(y != (head["y"] + 1) for y in body_y_coords)
-#     if head["y"] < (board["height"] - 1) and no_up_mutilation :
-#         possible_moves.append("up")
-
-# no_down_mutilation = all(y != (head["y"] - 1) for y in body_y_coords)
-#     if head["y"] > 0 and no_down_mutilation:
-#         possible_moves.append("down")
-
-# no_right_mutilation = all(x != (head["x"] + 1) for x in body_x_coords)
-#     if head["x"] < (board["width"] - 1) and no_right_mutilation:
-#         possible_moves.append("right")
-
-# no_left_mutilation = all(x != (head["x"] - 1) for x in body_x_coords)
-#     if head["x"] > 0 and no_left_mutilation:
-#         possible_moves.append("left")
 
 # food = board["food"]
 #         closest = 0
