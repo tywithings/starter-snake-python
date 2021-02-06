@@ -7,7 +7,20 @@ import cherrypy
 This is a simple Battlesnake server written in Python.
 For instructions see https://github.com/BattlesnakeOfficial/starter-snake-python/README.md
 """
+# body_x_coords = [coord["x"] for coord in body]
+# body_y_coords = [coord["y"] for coord in body]
 
+def x(coord):
+    return coord["x"]
+
+def y(coord):
+    return coord["y"]
+
+class MoveBlock:
+    def __init__(obj, coord, move):
+        obj.x = x(coord)
+        obj.y = y(coord)
+        obj.move = move
 
 class Battlesnake(object):
     @cherrypy.expose
@@ -18,10 +31,10 @@ class Battlesnake(object):
         # TIP: If you open your Battlesnake URL in browser you should see this data
         return {
             "apiversion": "1",
-            "author": "",  # TODO: Your Battlesnake Username
-            "color": "#888888",  # TODO: Personalize
-            "head": "default",  # TODO: Personalize
-            "tail": "default",  # TODO: Personalize
+            "author": "tywithings",
+            "color": "#0093DC",
+            "head": "fang",
+            "tail": "hook",
         }
 
     @cherrypy.expose
@@ -40,11 +53,92 @@ class Battlesnake(object):
     def move(self):
         # This function is called on every turn of a game. It's how your snake decides where to move.
         # Valid moves are "up", "down", "left", or "right".
-        # TODO: Use the information in cherrypy.request.json to decide your next move.
         data = cherrypy.request.json
+        
+        board = data["board"]
+        me = data["you"]
+        head = me["head"]
+        body = me["body"]
 
-        # Choose a random direction to move in
-        possible_moves = ["up", "down", "left", "right"]
+        def top_limit():
+            return board["height"] - 1
+
+        def bottom_limit():
+            return 0
+
+        def right_limit():
+            return board["height"] - 1
+
+        def left_limit():
+            return 0        
+
+        def coord(x, y):
+            return { "x": x, "y": y }
+
+        def should_move_down():
+            down_coord = coord(x(head), y(head) - 1)
+            if y(down_coord) <= bottom_limit():
+                return (False, False, None)
+
+            move_block = MoveBlock(down_coord, "down")
+
+            return (True, False, move_block)
+
+        def should_move_right():
+            right_coord = coord(x(head) + 1, y(head))
+            if x(right_coord) >= right_limit():
+                return (False, False, None)
+
+            move_block = MoveBlock(right_coord, "right")
+
+            return (True, False, move_block)
+
+        def should_move_up():
+            up_coord = coord(x(head), y(head) + 1)
+            if y(up_coord) >= top_limit():
+                return (False, False, None)
+
+            move_block = MoveBlock(up_coord, "up")
+
+            return (True, False, move_block)
+
+        def should_move_left():
+            left_coord = coord(x(head) + 1, y(head))
+            if x(left_coord) <= left_limit():
+                return (False, False, None)
+
+            move_block = MoveBlock(left_coord, "left")
+
+            return (True, False, move_block)
+
+        
+
+        possible_moves = []
+
+        down_result = should_move_down()
+        right_result = should_move_right()
+        up_result = should_move_up()
+        left_result = should_move_left()
+
+        if bool(down_result[0]):
+            possible_moves.append(down_result[2].move)
+        if bool(right_result[0]):
+            possible_moves.append(right_result[2].move)
+        if bool(up_result[0]):
+            possible_moves.append(up_result[2].move)
+        if bool(left_result[0]):
+            possible_moves.append(left_result[2].move)
+
+        print(f"MOVES: {possible_moves}")
+
+        
+
+        
+        # possible_moves = ["up", "down", "right", "left"]
+
+        
+
+        # Choose a random direction to move in from applicable moves
         move = random.choice(possible_moves)
 
         print(f"MOVE: {move}")
@@ -69,3 +163,37 @@ if __name__ == "__main__":
     )
     print("Starting Battlesnake Server...")
     cherrypy.quickstart(server)
+
+
+# no_up_mutilation = all(y != (head["y"] + 1) for y in body_y_coords)
+#     if head["y"] < (board["height"] - 1) and no_up_mutilation :
+#         possible_moves.append("up")
+
+# no_down_mutilation = all(y != (head["y"] - 1) for y in body_y_coords)
+#     if head["y"] > 0 and no_down_mutilation:
+#         possible_moves.append("down")
+
+# no_right_mutilation = all(x != (head["x"] + 1) for x in body_x_coords)
+#     if head["x"] < (board["width"] - 1) and no_right_mutilation:
+#         possible_moves.append("right")
+
+# no_left_mutilation = all(x != (head["x"] - 1) for x in body_x_coords)
+#     if head["x"] > 0 and no_left_mutilation:
+#         possible_moves.append("left")
+
+# food = board["food"]
+#         closest = 0
+#         target_bite = {}
+#         for bite in food:
+#           distance = abs(head["x"] - bite["x"]) + abs(head["y"] - bite["y"])
+
+#           if closest == 0 or distance < closest:
+#             closest = distance
+#             target_bite = bite
+
+#           break
+
+#         print(f"FOOD: {food}")
+#         print(f"CLOSEST: {closest}")
+#         print(f"TARGET BITE: {target_bite}")
+
