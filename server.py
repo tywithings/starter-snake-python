@@ -59,6 +59,8 @@ class Battlesnake(object):
         me = data["you"]
         head = me["head"]
         body = me["body"]
+        food = board["food"]
+        hazards = board["hazards"]
 
         def top_limit():
             return board["height"] - 1
@@ -77,16 +79,19 @@ class Battlesnake(object):
 
         def should_move_down():
             down_coord = coord(x(head), y(head) - 1)
-            if y(down_coord) <= bottom_limit():
+            if y(down_coord) <= bottom_limit() or down_coord in body or down_coord in hazards:
                 return (False, False, None)
 
             move_block = MoveBlock(down_coord, "down")
+
+            if down_coord in food:
+                return (True, True, move_block)
 
             return (True, False, move_block)
 
         def should_move_right():
             right_coord = coord(x(head) + 1, y(head))
-            if x(right_coord) >= right_limit():
+            if x(right_coord) >= right_limit() or right_coord in body or right_coord in hazards:
                 return (False, False, None)
 
             move_block = MoveBlock(right_coord, "right")
@@ -95,7 +100,7 @@ class Battlesnake(object):
 
         def should_move_up():
             up_coord = coord(x(head), y(head) + 1)
-            if y(up_coord) >= top_limit():
+            if y(up_coord) >= top_limit() or up_coord in body or up_coord in hazards:
                 return (False, False, None)
 
             move_block = MoveBlock(up_coord, "up")
@@ -104,7 +109,7 @@ class Battlesnake(object):
 
         def should_move_left():
             left_coord = coord(x(head) + 1, y(head))
-            if x(left_coord) <= left_limit():
+            if x(left_coord) <= left_limit() or left_coord in body or left_coord in hazards:
                 return (False, False, None)
 
             move_block = MoveBlock(left_coord, "left")
