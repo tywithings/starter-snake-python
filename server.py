@@ -16,6 +16,9 @@ def x(coord):
 def y(coord):
     return coord["y"]
 
+def top_limit(board):
+        return board["height"] - 1
+
 class MoveBlock:
     def __init__(obj, coord, move):
         obj.x = x(coord)
@@ -62,9 +65,6 @@ class Battlesnake(object):
         food = board["food"]
         hazards = board["hazards"]
 
-        def top_limit():
-            return board["height"] - 1
-
         def bottom_limit():
             return 0
 
@@ -100,7 +100,7 @@ class Battlesnake(object):
 
         def should_move_up():
             up_coord = coord(x(head), y(head) + 1)
-            if y(up_coord) >= top_limit() or up_coord in body or up_coord in hazards:
+            if y(up_coord) >= top_limit(board) or up_coord in body or up_coord in hazards:
                 return (False, False, None)
 
             move_block = MoveBlock(up_coord, "up")
